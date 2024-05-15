@@ -6,22 +6,16 @@ public class Encryption {
     
     //rcon constants used in key expansion
     public static final int[] rcon = {
-            0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36, 0x6c, 0xd8, 0xab, 0x4d, 0x9a,
-            0x2f, 0x5e, 0xbc, 0x63, 0xc6, 0x97, 0x35, 0x6a, 0xd4, 0xb3, 0x7d, 0xfa, 0xef, 0xc5, 0x91, 0x39,
-            0x72, 0xe4, 0xd3, 0xbd, 0x61, 0xc2, 0x9f, 0x25, 0x4a, 0x94, 0x33, 0x66, 0xcc, 0x83, 0x1d, 0x3a,
-            0x74, 0xe8, 0xcb, 0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36, 0x6c, 0xd8,
-            0xab, 0x4d, 0x9a, 0x2f, 0x5e, 0xbc, 0x63, 0xc6, 0x97, 0x35, 0x6a, 0xd4, 0xb3, 0x7d, 0xfa, 0xef,
-            0xc5, 0x91, 0x39, 0x72, 0xe4, 0xd3, 0xbd, 0x61, 0xc2, 0x9f, 0x25, 0x4a, 0x94, 0x33, 0x66, 0xcc,
-            0x83, 0x1d, 0x3a, 0x74, 0xe8, 0xcb, 0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b,
-            0x36, 0x6c, 0xd8, 0xab, 0x4d, 0x9a, 0x2f, 0x5e, 0xbc, 0x63, 0xc6, 0x97, 0x35, 0x6a, 0xd4, 0xb3,
-            0x7d, 0xfa, 0xef, 0xc5, 0x91, 0x39, 0x72, 0xe4, 0xd3, 0xbd, 0x61, 0xc2, 0x9f, 0x25, 0x4a, 0x94,
-            0x33, 0x66, 0xcc, 0x83, 0x1d, 0x3a, 0x74, 0xe8, 0xcb, 0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20,
-            0x40, 0x80, 0x1b, 0x36, 0x6c, 0xd8, 0xab, 0x4d, 0x9a, 0x2f, 0x5e, 0xbc, 0x63, 0xc6, 0x97, 0x35,
-            0x6a, 0xd4, 0xb3, 0x7d, 0xfa, 0xef, 0xc5, 0x91, 0x39, 0x72, 0xe4, 0xd3, 0xbd, 0x61, 0xc2, 0x9f,
-            0x25, 0x4a, 0x94, 0x33, 0x66, 0xcc, 0x83, 0x1d, 0x3a, 0x74, 0xe8, 0xcb, 0x8d, 0x01, 0x02, 0x04,
-            0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36, 0x6c, 0xd8, 0xab, 0x4d, 0x9a, 0x2f, 0x5e, 0xbc, 0x63,
-            0xc6, 0x97, 0x35, 0x6a, 0xd4, 0xb3, 0x7d, 0xfa, 0xef, 0xc5, 0x91, 0x39, 0x72, 0xe4, 0xd3, 0xbd,
-            0x61, 0xc2, 0x9f, 0x25, 0x4a, 0x94, 0x33, 0x66, 0xcc, 0x83, 0x1d, 0x3a, 0x74, 0xe8, 0xcb
+            {01 00 00 00},
+            {02 00 00 00},
+            {04 00 00 00},
+            {08 00 00 00},
+            {10 00 00 00},
+            {20 00 00 00},
+            {40 00 00 00},
+            {80 00 00 00},
+            {1B 00 00 00},
+            {36 00 00 00}
     };
     
     //sBox constants used in subBytes
@@ -129,84 +123,75 @@ public class Encryption {
         }
     }
     
-    public int[][] keyExpansion(String k) {
-        //Set number of keys - 10 keys x 4 bytes + initial
-        int keySize = 44;
-        //Initialize rcon pointer
-        int rconIndex = 1;
-        //Initialize key variable
-        expandedKey = new int[4][keySize];
-        //First parse key into 4x4 matrix
-        for (int r = 0; r < 4; r ++) {
-            for (int c = 0; c < 4; c ++) {
-                expandedKey[r][c] = Integer.parseInt(key.substring9((8 * r) + (2 * c), (8 * r) + (2 * c + 2)), 16);
-            }
+    public void keySchedule(String initialKey) {
+        //Initialize roundConstantPointer
+        int roundConstantPointer = 1;
+        
+        //Initialize expandedKey
+        expandedKey = new int[44][4];
+        
+        //Assign first four rows of expandedKey to initialKey
+        for (int z = 0; z < 4; z ++) {
+            expandedKey[z] = initialKey.substring(z * 4, (z * 4) + 8);
         }
-        //Set start point
-        int current = 4;
-        //Set temp variables
-        int a = new int[4];
-        int b;
-        while (current < keySize) {
-            if (current % 4 == 0) {
-                for (b = 0; b < 4; b ++) {
-                    a[b] = expandedKey[b][current - 1];
-                }
-                //Go through the g function
-                a = gFunction(a, rconIndex++);
-                //xor with [i - 4] word
-                for (b = 0; b < 4; b ++) {
-                    expandedKey[b][current] = a[b] ^ expandedKey[b][current - 4];
-                }
-            }
-            else {
-                //Simply xor with [i - 4]
-                for (b = 0; b < 4; b ++) {
-                    expandedKey[b][current] = expandedKey[b][current - 1] ^ expandedKey[b][current - 4];
-                }
-            }
-            current ++;
+        
+        //Assign values to rest of expandedKey
+        for (int i = 4; i < 44; i ++) {
+            expandedKey[i] = getNextFourWords(k, roundConstantPointer);
+            roundConstantPointer ++;
         }
         
     }
     
+    /* 
+    Helper function in keySchedule
+    */
+    public int[] getNextFourWords(int[] previousFourWords, int roundConstantPointer) {
+        int[] nextFourWords = new int[4];
+        nextFourWords[0] = previousFourWords[0] ^ gFunction(previousFourWords[3], roundConstantPointer);
+        nextFourWords[1] = nextFourWords[0] ^ previousFourWords[1];
+        nextFourWords[2] = nextFourWords[1] ^ previousFourWords[2];
+        nextFourWords[3] = nextFourWords[2] ^ previousFourWords[3];
+        return nextFourWords;
+    }
+    
     /*
-    Helper function used in key expansion:
     For each 4th word in the expanded key, gFunction 
     (1) rotates the word, 
     (2) subs with sBox, 
     (3) xors each byte with an rcon constant
     */
-    public int[] gFunction(int[] a, int index) {
+    public int[] gFunction(int[] word, int roundConstantPointer) {
         int[] tmp = new int[4];
-        //Rotate similar to shiftRows
-        tmp[0] = a[1];
-        tmp[1] = a[2];
-        tmp[2] = a[3];
-        tmp[3] = a[0];
-        //Sub with sBox
+        //One-byte left circular rotation on word
+        tmp[0] = word[1];
+        tmp[1] = word[2];
+        tmp[2] = word[3];
+        tmp[3] = word[0];
+        //Byte substitution for each byte using sBox
         int val;
         for (int i = 0; i < 4; i ++) {
             val = tmp[i];
             tmp[i] = sBox[val / 16][val % 16];
         }
-        //xor with rcon
-        tmp[0] ^= rcon[index];
+        //xor bytes with round constant
+        tmp[0] ^= rcon[roundConstantPointer];
         return tmp;
     }
-    
+
+ 
     /*
     Adds round key to stateArray via xor
     */
     public void addRoundKey(int round) {
-        //Get round key from key matrix
         int[][] roundKey = new int[4][4];
+        //Get round key from expanded key
         for (int r = 0; r < 4; r ++) {
             for (int c = 0; c < 4; c ++) {
                 roundKey[r][c] = expandedKey[r][(4 * round) + c];
             }
         }
-        //xor roundKey with stateArray
+        //xor stateArray with roundKey
         for (int r = 0; r < 4; r ++) {
             for (int c = 0; c < 4; c ++) {
                 stateArray[r][c] ^= roundKey[r][c];
@@ -217,19 +202,16 @@ public class Encryption {
     /*
     Shifts rows in stateArray
     Row 0 is left untouched
-    Row 1 shifts 1 left
-    Row 2 shifts 2 left
-    Row 3 shifts 3 left
     */
     public void shiftRows() {
-        //Second row shift left one
+        //Row 1 shifts 1 left
     	byte temp1 = stateArray[1][0];
     	for (int c = 0; c < 3; c ++) {
     		stateArray[1][c] = stateArray[1][c + 1];
     	}
     	stateArray[1][3] = temp1;
     
-    	//Third row shift left two
+    	//Row 2 shifts 2 left
     	byte temp2 = stateArray[2][0];
     	byte temp3 = stateArray[2][1];
     	for (int c = 0; c < 2; c ++) {
@@ -238,7 +220,7 @@ public class Encryption {
     	stateArray[2][2] = temp2;
     	stateArray[2][3] = temp3;
     	
-    	//Fourth row shift left three
+    	//Row 3 shifts 3 left
     	byte temp4 = stateArray[3][3];
     	for (int c = 3; c > 0; c --) {
     		stateArray[3][c] = stateArray[3][c - 1];
@@ -246,6 +228,9 @@ public class Encryption {
     	stateArray[3][0] = temp4;
     }
     
+    /*
+    Substitutes bytes in stateArray using sBox
+    */
     public void subBytes() {
         for (int r = 0; r < 4; r ++) {
             for (int c = 0; c < 4; c ++) {
