@@ -96,7 +96,7 @@ public class Encryption {
         //Assign stateArray to plaintext
         stateArray = new byte[4][4];
         for (int i = 0; i < 4; i ++) {
-            stateArray[i] = plaintext.substring(i * 4, i + 16).getBytes();
+            stateArray[i] = plaintext.substring(i * 4, (i * 4) + 16).getBytes();
         }
         
         //Assign key to k 
@@ -104,8 +104,15 @@ public class Encryption {
         stateArray = addRoundKey(stateArray, wordsKeyExpansion, 0);
         
         for (int round = 0; round < 10; r ++) {
-            
+            subBytes();
+            shiftRows();
+            mixColumns();
+            addRoundKey(i);
         }
+        
+        subBytes();
+        shiftRows();
+        addRoundKey();
         
         
     }
@@ -196,7 +203,7 @@ public class Encryption {
         int[][] roundKey = new int[4][4];
         for (int r = 0; r < 4; r ++) {
             for (int c = 0; c < 4; c ++) {
-                roundKey[r][c] = this.expandedKey[r][(4 * round) + c];
+                roundKey[r][c] = expandedKey[r][(4 * round) + c];
             }
         }
         //xor roundKey with stateArray
