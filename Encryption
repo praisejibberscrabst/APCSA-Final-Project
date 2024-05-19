@@ -43,7 +43,7 @@ public class Encryption {
             0x54, 0xbb, 0x16};
     
 
-    public void encrypt(String plaintext, String k) {
+    public String encrypt(String plaintext, String k) {
         //Assign stateArray to plaintext
         stateArray = new byte[4][4];
         int c = 0;
@@ -123,6 +123,15 @@ public class Encryption {
         System.out.println();
         System.out.println("Ciphertext: ");
         displayStateArray();
+        
+        //Return ciphertext
+        String ciphertext = "";
+        for (c = 0; c < 4; c ++) {
+            for (r = 0; r < 4; r ++) {
+                ciphertext += Integer.toHexString(stateArray[r][c] & 0xFF);
+            }
+        }
+        return ciphertext;
         
         
         
