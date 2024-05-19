@@ -46,29 +46,67 @@ public class Encryption {
     public void encrypt(String plaintext, String k) {
         //Assign stateArray to plaintext
         stateArray = new byte[4][4];
-        for (int i = 0; i < 4; i ++) {
-            stateArray[i] = plaintext.substring(i * 4, (i * 4) + 4).getBytes();
+        int c = 0;
+        int r = 0;
+        for (int i = 0; i < 32; i += 2) {
+            stateArray[r][c] = (byte) Integer.parseInt(plaintext.substring(i, i + 2), 16);
+            if (r == 3) {
+                r = 0;
+                c ++;
+            }
+            else {
+                r ++;
+            }
         }
+
+     
         
         
         // Display plaintext
         System.out.println("Plaintext: ");
-        displayStateArrayStringFormat();
+        displayStateArray();
         System.out.println();
 
 
         //Assign values to expandedKey
         keySchedule(k);
+        System.out.println();
+        System.out.println("Original key: ");
+        System.out.println(k);
+        
+        System.out.println("Expanded key: ");
+        for (r = 0; r < expandedKey.length; r ++) {
+            for (c = 0; c < expandedKey[0].length; c ++) {
+                System.out.print(Integer.toHexString(expandedKey[r][c]));
+            }
+        }
+        System.out.println();
         
         //xor stateArray with original key
+        System.out.println();
         addRoundKey(0);
+        System.out.println("State array after 0th round key: ");
+        displayStateArray();
+        System.out.println();
         
-        for (int round = 0; round < 10; round ++) {
+        for (int round = 1; round < 10; round ++) {
+            //System.out.println("Start of Round " + round + ": ");
+            //displayStateArray();
+            
             subBytes();
+            //System.out.println("After subBytes: ");
+            //displayStateArray();
+            
             shiftRows();
+            //System.out.println("After shiftRows: ");
+            //displayStateArray();
+            
             mixColumns();
+            //System.out.println("After mixColumns: ");
+            //displayStateArray();
+            
             addRoundKey(round);
-            System.out.println("Round " + round + ": ");
+            System.out.println("End of Round " + round + ": ");
             displayStateArray();
             System.out.println();
         }
@@ -84,31 +122,41 @@ public class Encryption {
         //Display ciphertext
         System.out.println();
         System.out.println("Ciphertext: ");
-        displayStateArrayStringFormat();
+        displayStateArray();
         
         
         
     }
     
     public void displayStateArray() {
+        System.out.println();
+        System.out.println(stateArray);
+        System.out.println("State Array in Row Major: ");
         for (int r = 0; r < 4; r ++) {
             for (int c = 0; c < 4; c ++) {
-                System.out.print(stateArray[r][c] + " ");
+                System.out.print(Integer.toHexString(stateArray[r][c] & 0xFF) + " ");
+                //System.out.print(Integer.toHexString(stateArray[r][c]) + " ");
                 if (c == 3) {
                     System.out.println();
                 }
             }
             
         }
-    }
-    
-    public void displayStateArrayStringFormat() {
-        for (byte[] b : stateArray) {
-            String stringFormat = new String(b);
-            System.out.print(stringFormat);
+        System.out.println();
+        System.out.println("State Array in Column Major: ");
+        
+        String result = "";
+        
+        for (int c = 0; c < 4; c ++) {
+            for (int r = 0; r < 4; r ++) {
+                result += Integer.toHexString(stateArray[r][c] & 0xFF);
+            }
+            result += " ";
         }
+        System.out.println(result);
         System.out.println();
     }
+ 
 
     //This function created by "hlilje" on GitHub (I don't understand the math)
     private static byte galoisMult(byte a, byte b) {
@@ -145,13 +193,13 @@ public class Encryption {
         int index = 0;
         for (int r = 0; r < 4; r ++) {
             for (int c = 0; c < 4; c ++) {
-                expandedKey[r][c] = Integer.valueOf(initialKey.substring(index, index + 1));
-                index ++;
+                expandedKey[r][c] = Integer.parseInt(initialKey.substring(index, index + 2), 16);
+                index += 2;
             }
         }
         
         //Assign values to rest of expandedKey
-        for (int i = 4; i < 40; i += 4) {
+        for (int i = 4; i < 41; i += 4) {
             int[][] previous = new int[4][4];
             previous[0] = expandedKey[i - 4];
             previous[1] = expandedKey[i - 3];
@@ -196,7 +244,7 @@ public class Encryption {
         int val;
         for (int i = 0; i < 4; i ++) {
             val = tmp[i];
-            tmp[i] = sBox[val & 0xff];
+            tmp[i] = sBox[val];
         }
         //xor bytes with round constant
         tmp[0] ^= Integer.parseInt(rcon[roundConstantPointer], 16);
@@ -215,10 +263,19 @@ public class Encryption {
                 thisRoundKey[r][c] = expandedKey[round * 4 + r][c];
             }
         }
+        System.out.println("Round key for round " + round + ": ");
+        
+        for (int a = 0; a < 4; a ++) {
+            for (int b = 0; b < 4; b ++) {
+                System.out.print(Integer.toHexString(thisRoundKey[a][b]) + " ");
+            }
+        }
+        System.out.println();
+        
         //xor stateArray with roundKey
-        for (int r = 0; r < 4; r ++) {
-            for (int c = 0; c < 4; c ++) {
-                stateArray[r][c] ^= thisRoundKey[r][c];
+        for (int c = 0; c < 4; c ++) {
+            for (int r = 0; r < 4; r ++) {
+                stateArray[r][c] = (byte) ((char) stateArray[r][c] ^ thisRoundKey[c][r]);
             }
         }
     }
