@@ -1,0 +1,12 @@
+public class EncryptionRunner {
+    public static void main(String[] args) {
+        String plaintext = "00112233445566778899aabbccddeeff";
+        String key = "000102030405060708090a0b0c0d0e0f";
+        Encryption ar = new Encryption();
+        String ciphertext = ar.encrypt(plaintext, key);
+        System.out.println();
+        System.out.println("PLAINTEXT: " + plaintext);
+        System.out.println("CIPHERTEXT: " + ciphertext);
+        
+    }    
+}
