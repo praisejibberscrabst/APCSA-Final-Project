@@ -59,11 +59,9 @@ public class Encryption {
             }
         }
 
-     
         
-        
-        // Display plaintext
-        System.out.println("Plaintext: ");
+        // Display stateArray before round 0
+        System.out.println("Original state array: ");
         displayStateArray();
         System.out.println();
 
@@ -74,6 +72,7 @@ public class Encryption {
         System.out.println("Original key: ");
         System.out.println(k);
         
+        //Display expanded key
         System.out.println("Expanded key: ");
         for (r = 0; r < expandedKey.length; r ++) {
             for (c = 0; c < expandedKey[0].length; c ++) {
@@ -81,11 +80,15 @@ public class Encryption {
             }
         }
         System.out.println();
+        System.out.println("------------------------------------");
+        
+        System.out.println();
         
         //xor stateArray with original key
         System.out.println();
         addRoundKey(0);
-        System.out.println("State array after 0th round key: ");
+        System.out.println();
+        System.out.println("State array xored with 0th round key: ");
         displayStateArray();
         System.out.println();
         
@@ -106,6 +109,7 @@ public class Encryption {
             //displayStateArray();
             
             addRoundKey(round);
+            System.out.println();
             System.out.println("End of Round " + round + ": ");
             displayStateArray();
             System.out.println();
@@ -115,13 +119,10 @@ public class Encryption {
         subBytes();
         shiftRows();
         addRoundKey(10);
-        System.out.println("Round 10: ");
-        displayStateArray();
         
-        
-        //Display ciphertext
+        //Display stateArray after round 10
         System.out.println();
-        System.out.println("Ciphertext: ");
+        System.out.println("End of Round 10: ");
         displayStateArray();
         
         //Return ciphertext
@@ -139,7 +140,6 @@ public class Encryption {
     
     public void displayStateArray() {
         System.out.println();
-        System.out.println(stateArray);
         System.out.println("State Array in Row Major: ");
         for (int r = 0; r < 4; r ++) {
             for (int c = 0; c < 4; c ++) {
@@ -163,33 +163,9 @@ public class Encryption {
             result += " ";
         }
         System.out.println(result);
+        System.out.println("------------------------------------");
         System.out.println();
     }
- 
-
-    //This function created by "hlilje" on GitHub (I don't understand the math)
-    private static byte galoisMult(byte a, byte b) {
-        int p = 0;
-        int hiBitSet = 0;
-        for (int i = 0; i < 8; ++i) {
-            if ((b & 1) == 1)
-                p ^= a;
-            hiBitSet = a & 0x80;
-            a <<= 1;
-            if (hiBitSet == 0x80)
-                a ^= 0x1b;
-            b >>= 1;
-        }
-        return (byte) (p % 256);
-    }
-
-    public int[] xorTwoIntArrays(int[] first, int[] second) {
-        int[] result = new int[4];
-        for (int i = 0; i < 4; i ++) {
-            result[i] = first[i] ^ second[i];
-        }
-        return result;
-    } 
  
     public void keySchedule(String initialKey) {
         //Initialize roundConstantPointer
@@ -237,6 +213,19 @@ public class Encryption {
     }
     
     /*
+    Helper function in keySchedule
+    */
+    
+    public int[] xorTwoIntArrays(int[] first, int[] second) {
+        int[] result = new int[4];
+        for (int i = 0; i < 4; i ++) {
+            result[i] = first[i] ^ second[i];
+        }
+        return result;
+    }
+    
+    /*
+    Function for keySchedule
     For each 4th word in the expanded key, gFunction 
     (1) rotates the word, 
     (2) subs with sBox, 
@@ -272,8 +261,10 @@ public class Encryption {
                 thisRoundKey[r][c] = expandedKey[round * 4 + r][c];
             }
         }
+        System.out.println();
         System.out.println("Round key for round " + round + ": ");
         
+        //Display round key for this round
         for (int a = 0; a < 4; a ++) {
             for (int b = 0; b < 4; b ++) {
                 System.out.print(Integer.toHexString(thisRoundKey[a][b]) + " ");
@@ -349,5 +340,24 @@ public class Encryption {
             stateArray[3][i] = (byte) (galoisMult(tmpArray[0], (byte) 3) ^ galoisMult(tmpArray[1], (byte) 1) ^
                                    galoisMult(tmpArray[2], (byte) 1) ^ galoisMult(tmpArray[3], (byte) 2));
         }
+    }
+    
+    /*
+    Galois multiplication for mixColumns step
+    Written by "hlilje" on Github (super complicated math I don't understand)
+    */
+    private static byte galoisMult(byte a, byte b) {
+        int p = 0;
+        int hiBitSet = 0;
+        for (int i = 0; i < 8; ++i) {
+            if ((b & 1) == 1)
+                p ^= a;
+            hiBitSet = a & 0x80;
+            a <<= 1;
+            if (hiBitSet == 0x80)
+                a ^= 0x1b;
+            b >>= 1;
+        }
+        return (byte) (p % 256);
     }
 }
