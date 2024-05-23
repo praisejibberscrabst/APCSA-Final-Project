@@ -93,24 +93,26 @@ public class Encryption {
         System.out.println();
         
         for (int round = 1; round < 10; round ++) {
-            //System.out.println("Start of Round " + round + ": ");
-            //displayStateArray();
-            
+            System.out.println("------------------------------------");
+            System.out.println();
+            System.out.println("Start of Round " + round + ": ");
+            displayStateArray();
+        
             subBytes();
-            //System.out.println("After subBytes: ");
-            //displayStateArray();
+            System.out.println("After subBytes: ");
+            displayStateArray();
             
             shiftRows();
-            //System.out.println("After shiftRows: ");
-            //displayStateArray();
+            System.out.println("After shiftRows: ");
+            displayStateArray();
             
             mixColumns();
-            //System.out.println("After mixColumns: ");
-            //displayStateArray();
+            System.out.println("After mixColumns: ");
+            displayStateArray();
             
             addRoundKey(round);
             System.out.println();
-            System.out.println("End of Round " + round + ": ");
+            System.out.println("Afer xor with round key: ");
             displayStateArray();
             System.out.println();
         }
@@ -140,30 +142,29 @@ public class Encryption {
     
     public void displayStateArray() {
         System.out.println();
-        System.out.println("State Array in Row Major: ");
+        System.out.println("State Array: ");
         for (int r = 0; r < 4; r ++) {
             for (int c = 0; c < 4; c ++) {
                 System.out.print(Integer.toHexString(stateArray[r][c] & 0xFF) + " ");
-                //System.out.print(Integer.toHexString(stateArray[r][c]) + " ");
                 if (c == 3) {
                     System.out.println();
                 }
             }
             
         }
-        System.out.println();
-        System.out.println("State Array in Column Major: ");
-        
-        String result = "";
-        
-        for (int c = 0; c < 4; c ++) {
-            for (int r = 0; r < 4; r ++) {
-                result += Integer.toHexString(stateArray[r][c] & 0xFF);
-            }
-            result += " ";
-        }
-        System.out.println(result);
-        System.out.println("------------------------------------");
+        //System.out.println();
+        //System.out.println("State Array in Column Major: ");
+        //
+        //String result = "";
+        //
+        //for (int c = 0; c < 4; c ++) {
+        //    for (int r = 0; r < 4; r ++) {
+        //        result += Integer.toHexString(stateArray[r][c] & 0xFF);
+        //    }
+        //    result += " ";
+        //}
+        //System.out.println(result);
+        //System.out.println("------------------------------------");
         System.out.println();
     }
  
